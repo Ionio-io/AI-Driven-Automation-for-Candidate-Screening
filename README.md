@@ -1,4 +1,4 @@
-# Automating the Candidate Selection Process using LLMs
+# AI-Enabled Candidate Evaluation
 ---
 ## Overview
 
