@@ -1,11 +1,11 @@
 # Automating the Candidate Selection Process using LLMs
-
+---
 ## Overview
 
 This project aims to revolutionize the candidate selection process by leveraging Google's Gemini Pro and Phone call platform Bland.ai . In the fast-paced world of recruitment, traditional methods can be inefficient and time-consuming. With the integration of AI, we streamline resume screening, phone interviews, and candidate evaluation, enhancing efficiency and improving the quality of hires.
 <img width="608" alt="image" src="https://github.com/Ionio-io/AI-Driven-Automation-for-Candidate-Screening/assets/91791239/4e26f85c-6b40-4e26-9e27-748067319aef">
 
-
+---
 ## Key Features
 
 - **AI-Powered Resume Screening**: Utilizes the GPT-3.5 model to analyze resumes and provide a detailed summary, conclusion, and relevant questions for initial screening.
@@ -17,7 +17,7 @@ This project aims to revolutionize the candidate selection process by leveraging
 - **Personalized Candidate Recommendations**: AI analyzes candidates' profiles and preferences to recommend personalized job opportunities, improving the candidate matching process.
 
 - **Onboarding and Training Plans**: AI assesses new hires' skills and identifies knowledge gaps, recommending targeted training programs to accelerate their integration into the company.
-  
+---
 ### Installation
 
 1. Clone the repository:
