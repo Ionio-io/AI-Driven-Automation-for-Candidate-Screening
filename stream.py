@@ -91,7 +91,7 @@ def inicall(phone_no):
         "amd": False,
     }
     headers = {
-        "authorization": "sk-zkic20236xlh90oguo8fek0aclmpnrv0t8youl8yc8lt0lkvnniffsmzlyd8yhul69",
+        "authorization": "YOUR KEY",
         "Content-Type": "application/json",
     }
     response = requests.request("POST", url, json=payload, headers=headers)
