@@ -65,6 +65,7 @@ def LLMcall(role):
      {information}
 
     It should follow this pattern - 
+    Rate the candidate on a scale of 1-5 in the summary.
     Summary of Candidate:
 
     Based on the provided resume details, the candidate possesses a diverse skill 
@@ -81,20 +82,21 @@ def LLMcall(role):
     requirements of the role. Therefore, I recommend accepting the candidate for the position.
     
     Questions to be asked:
-    ask the candidate about their experience in mention any relevant experience or skills that are important for the job role.
-    based on the information provided in the resume, ask the candidate about their interest in mention any relevant interests or activities related to the job role.
+    Come up with 7 personalized questions regarding their previous projects in the previous company based on the specific job roles to be asked on a phone screen. 
+    First few questions, should be more background, easier to answer, then the later ones will be more personalized & detailed questions. Questions about their past projects, past company, team size and so on. 
+    Mention the company name whereever relevant. This should be a JSON.
     
     Your final response should be in JSON with these objects
-    summary: summary and conclusion about candidate resume with the above format in atleast 180 words with proper line breaks and headings. Use emojies in headings to make it look beautiful.
-    questions: array of 2 questions to be asked
-    name: candidate name
+    summary: summary and conclusion about candidate resume with the above format in atleast 200 words with proper line breaks and headings. Use emojis in headings to make it look beautiful.
+    questions : array of 7 questions to be asked
+    name: candidate's first name
     phone_no: candidate phone no with country code
 
     """
     summary_prompt = PromptTemplate(
         input_variables=["information", "role"], template=summary_template
     )
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.5, api_key=constants.OPENAI_API_KEY)
+    llm = ChatOpenAI(model="gpt-4", temperature=0.5, api_key=constants.OPENAI_API_KEY)
     chain = LLMChain(llm=llm, prompt=summary_prompt)
     result = chain.invoke(input={"information": information, "role": role})
     summary = result["text"]
@@ -109,16 +111,16 @@ def inicall(summary, candidate_name, job_role, phone_no):
     After you speak your first sentence, if user says yes they have time then continue with the interview otherwise say "Okay no worries, you can hang up the call" and stop.
 
     You have to start the interview with the given questions and followups, make sure you follow the questions and followups in given order one by one. Here are the questions and followups:
-    Question-1: "What is your current compensation?"
+    Question-1: Do you have a notice period, how long? how soon can you join?
+    Question-2: What is your current compensation? 
     Followup 1: If the candidate is a fresher then ask them "what is your salary expectation?" otherwise go with Question 2
-    Followup 2: After the candidate provides their expectation, if the expected salary is greater than 25,000 then say "Our current compensation is 25,000 per month, are you okay with that?".
+    Followup 2: After the candidate provides their expectation, if the expected salary is greater than ₹25,000 then say 
+    "Our current compensation is ₹25,000 per month, would you be okay with that?". 
 
-    Question-2: "What is your notice period or how soon you can join?"
-
-    After these 2 questions, ask these 2 questions provided to you as an array of questions:
-    {st.session_state.summary["questions"]} 
+    After these questions. Ask a few basic questions to lead into the next questions from in the array {st.session_state.summary["questions"]}, organically ask the remaining questions.
     
-    Once you have asked these 2 questions, say "That's it from my side, we will notify you regarding further rounds if you get selected. Thank you for your time, you can hang up the call." and stop.
+    Once you have asked these questions. Summarize everything once again you've gathered. 
+    Then say something along the lines of 'that's it from my side, thank you for your time. We'll get back to you if we decide to move ahead. You can hang up the call'
 
     Here is the candidate information:
     {summary}
@@ -130,10 +132,16 @@ def inicall(summary, candidate_name, job_role, phone_no):
     {job_role}
 
     NOTE: Never hang up the call without the permission of candidate if you are hanging up the call.
+
+    Here's what YOU have already said in the first message, "You recently applied for an AI Intern Role at the company, this will only take about 5 minutes, does that work?"
     """
 
     first_sentence = f"""
-    Hey ${candidate_name} I am neo and I am calling from IONIO regarding the job appliction you recently applied for. This is an AI based telephone interview so no need to worry, we are just getting some information about you. An important notice, I am still in an experimental phase so i might take couple of seconds to reply and please make sure you don't get silent for more than 2 seconds while speaking. So let's get started, Could you confirm if this is a convenient time to speak?
+    Hey ${candidate_name}... I am Neo, an AI HR Representative calling from Ionio. It's the company with the yellow light house logo? You recently applied for an Machine Learning Intern Role at the company. Just wanted to talk about that. 
+    
+    ...Yes...i know... i know. I am an actual AI...it's a lil weird. 
+    I'm still experimental... I might take a few seconds to respond, the call might get dropped, I might talk over you & so on... 
+    Please try to be patient & talk slightly faster than usual, with fewer pauses but, this will only take about 5 minutes, is this a good time to talk?
     """
     url = "https://api.bland.ai/v1/calls"
     payload = {
@@ -143,13 +151,17 @@ def inicall(summary, candidate_name, job_role, phone_no):
         "wait_for_greeting": True,
         "model": "base",
         "tools": [],
-        "record": False,
+        "record": True,
         "voice_settings": {},
         "language": "eng",
         "answered_by_enabled": True,
-        "temperature": 0,
+        "interruption_threshold": 170,
+        "temperature": 0.5,
         "amd": False,
-        "max_duration":5
+        "max_duration":7,
+        "summary_prompt":"Summarize the call in English.",
+        "analysis_prompt":"Find the candidates's current notice period, current compensation?",
+        "analysis_schema": {"notice_period":"notice_period", "current_compensation":"current_compensation"}
     }
     headers = {
         "authorization": constants.BLAND_API_KEY,
@@ -196,6 +208,7 @@ def main():
             st.session_state.summary = summary
             st.subheader("Analysis Result")
             st.write(summary["summary"])
+            st.write(summary["questions"])
             if st.session_state.valid_phone:
                 st.write(f"Phone number found, click on 'Initiate Phone Interview' button to make a call to {st.session_state.phone}")
         else:
